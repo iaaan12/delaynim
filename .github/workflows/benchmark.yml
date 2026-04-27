@@ -1,0 +1,37 @@
+name: Test NVIDIA NIM Models
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Run every hour
+  workflow_dispatch:     # Allow manual trigger
+
+jobs:
+  test-models:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test models
+        env:
+          NIM_API_KEY: ${{ secrets.NIM_API_KEY }}
+        run: |
+          chmod +x scripts/test-models.sh
+          cd scripts && bash test-models.sh
+          cd ..
+
+      - name: Move results to root
+        run: |
+          if [ -f "scripts/results.json" ]; then
+            mv scripts/results.json results.json
+          fi
+
+      - name: Commit and push results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add results.json || true
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update benchmark results [skip ci]" && git push)
