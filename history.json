@@ -1,0 +1,106 @@
+{
+  "runs": [
+    {
+      "timestamp": "2026-04-27T20:14:55Z",
+      "prompt": "Write a Python function that checks if a number is prime and returns True or False",
+      "models": [
+        {
+          "model": "nvidia/llama-3.1-nemotron-70b-instruct",
+          "success": false,
+          "responseTime": null,
+          "tokensGenerated": null,
+          "totalTokens": null,
+          "response": null,
+          "error": "No content in response"
+        },
+        {
+          "model": "meta/llama-3.1-405b-instruct",
+          "success": true,
+          "responseTime": 145178,
+          "tokensGenerated": 378,
+          "totalTokens": 429,
+          "response": "**Prime Number Checker Function**\n=====================================\n\nThe following Python function checks if a given number is prime or not.\n\n```python\ndef is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    max_divisor = int(n**0.5) + 1\n    for d in range(3, max_divisor, 2):\n        if n % d == 0:\n            return False\n    return True\n```",
+          "error": null
+        },
+        {
+          "model": "meta/llama-3.1-70b-instruct",
+          "success": true,
+          "responseTime": 19629,
+          "tokensGenerated": 439,
+          "totalTokens": 490,
+          "response": "**Prime Number Checker Function**\n=====================================\n\nHere's a simple Python function that checks if a number is prime and returns `True` or `False`:\n\n```python\ndef is_prime(n):\n    if n <= 1:\n        return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n```",
+          "error": null
+        },
+        {
+          "model": "mistralai/mixtral-8x22b-instruct-v0.1",
+          "success": true,
+          "responseTime": 3727,
+          "tokensGenerated": 367,
+          "totalTokens": 386,
+          "response": " Here is a simple Python function that checks if a number is prime:\n\n```python\ndef is_prime(n):\n    if n <= 1:\n        return False\n    elif n <= 3:\n        return True\n    elif n % 2 == 0 or n % 3 == 0:\n        return False\n    i = 5\n    while i * i <= n:\n        if n % i == 0 or n % (i + 2) == 0:\n            return False\n        i += 6\n    return True\n```",
+          "error": null
+        },
+        {
+          "model": "mistralai/mixtral-8x7b-instruct-v0.1",
+          "success": true,
+          "responseTime": 7210,
+          "tokensGenerated": 372,
+          "totalTokens": 396,
+          "response": " Here is a simple Python function that checks if a number is prime:\n\n```python\ndef is_prime(n):\n    if n <= 1:\n        return False\n    elif n <= 3:\n        return True\n    elif n % 2 == 0 or n % 3 == 0:\n        return False\n    i = 5\n    while i * i <= n:\n        if n % i == 0 or n % (i + 2) == 0:\n            return False\n        i += 6\n    return True\n```",
+          "error": null
+        },
+        {
+          "model": "meta/llama-3-70b-instruct",
+          "success": false,
+          "responseTime": null,
+          "tokensGenerated": null,
+          "totalTokens": null,
+          "response": null,
+          "error": "No content in response"
+        },
+        {
+          "model": "meta/llama-3-8b-instruct",
+          "success": false,
+          "responseTime": null,
+          "tokensGenerated": null,
+          "totalTokens": null,
+          "response": null,
+          "error": "No content in response"
+        },
+        {
+          "model": "mistralai/mistral-large",
+          "success": false,
+          "responseTime": null,
+          "tokensGenerated": null,
+          "totalTokens": null,
+          "response": null,
+          "error": "No content in response"
+        },
+        {
+          "model": "mistralai/mistral-medium",
+          "success": false,
+          "responseTime": null,
+          "tokensGenerated": null,
+          "totalTokens": null,
+          "response": null,
+          "error": "No content in response"
+        },
+        {
+          "model": "mistralai/mistral-small",
+          "success": false,
+          "responseTime": null,
+          "tokensGenerated": null,
+          "totalTokens": null,
+          "response": null,
+          "error": "No content in response"
+        }
+      ],
+      "summary": {
+        "successCount": 4,
+        "totalModels": 10,
+        "fastestModel": "mistralai/mixtral-8x22b-instruct-v0.1",
+        "fastestTime": 3727
+      }
+    }
+  ]
+}
