@@ -108,6 +108,7 @@ for model in "${MODELS[@]}"; do
     START_TIME=$(date +%s%N)
 
     RESPONSE=$(curl -s -X POST \
+        --max-time 300 \
         "$API_BASE/chat/completions" \
         -H "Authorization: Bearer $API_KEY" \
         -H "Content-Type: application/json" \
@@ -227,7 +228,7 @@ import sys
 
 timestamp = """$TIMESTAMP"""
 prompt = """$PROMPT"""
-models = $MODELS_JSON
+models = json.loads("""$MODELS_JSON""")
 
 success_count = sum(1 for m in models if m.get('success'))
 total_count = len(models)
