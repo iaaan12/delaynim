@@ -4,8 +4,6 @@
 # Tests latest code generation models from build.nvidia.com
 # Supports parallel execution via MODEL_GROUP environment variable
 
-set -e
-
 API_KEY="${NIM_API_KEY}"
 API_BASE="https://integrate.api.nvidia.com/v1"
 MODEL_GROUP="${MODEL_GROUP:-all}"
@@ -107,8 +105,8 @@ for model in "${MODELS[@]}"; do
 
     START_TIME=$(date +%s%N)
 
-     RESPONSE=$(curl -s -X POST \
-        --max-time 600 \
+    RESPONSE=$(curl -s -X POST \
+        --max-time 300 \
         "$API_BASE/chat/completions" \
         -H "Authorization: Bearer $API_KEY" \
         -H "Content-Type: application/json" \
@@ -125,9 +123,43 @@ for model in "${MODELS[@]}"; do
             \"max_tokens\": 500,
             \"stream\": false
         }" 2>&1)
+    CURL_EXIT=$?
 
     END_TIME=$(date +%s%N)
     RESPONSE_TIME=$((($END_TIME - $START_TIME) / 1000000))
+
+    # Handle curl errors (timeouts, connection issues, etc.)
+    if [ $CURL_EXIT -ne 0 ]; then
+        ERROR="Request timeout or connection error (code $CURL_EXIT)"
+        echo -e "${RED}  ✗ Failed: $ERROR${NC}"
+        MODEL_RESULT=$(cat <<EOF
+{
+  "model": "$model",
+  "success": false,
+  "error": "$ERROR",
+  "responseTime": null,
+  "tokensGenerated": null,
+  "totalTokens": null,
+  "response": null
+}
+EOF
+)
+    # Handle empty response
+    elif [ -z "$RESPONSE" ]; then
+        ERROR="Empty response from API"
+        echo -e "${RED}  ✗ Failed: $ERROR${NC}"
+        MODEL_RESULT=$(cat <<EOF
+{
+  "model": "$model",
+  "success": false,
+  "error": "$ERROR",
+  "responseTime": null,
+  "tokensGenerated": null,
+  "totalTokens": null,
+  "response": null
+}
+EOF
+)
 
     ERROR=$(echo "$RESPONSE" | python3 -c "import sys, json; d=json.load(sys.stdin); print(d.get('error', {}).get('message', ''))" 2>/dev/null || echo "")
     if [ -n "$ERROR" ]; then
