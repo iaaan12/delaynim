@@ -660,7 +660,7 @@ function escHtml(s) {
 // ─── SQLite Data Loader ───────────────────────────────────────────────────────
 function loadFromDb(db) {
   const runsQ = db.exec(
-    'SELECT id, timestamp, prompt, success_count, total_models, fastest_model, fastest_time FROM runs ORDER BY timestamp ASC'
+    'SELECT id, timestamp, prompt, success_count, total_models, fastest_model, fastest_time FROM runs ORDER BY timestamp DESC'
   );
   if (!runsQ.length || !runsQ[0].values.length) return { runs: [] };
 
