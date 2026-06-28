@@ -1489,8 +1489,12 @@ async function init() {
     state.modelStats = processed.modelStats;
 
     // Nav status
+    const fmtNow = () => {
+      const n = new Date();
+      return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+    };
     document.getElementById('nav-status').textContent =
-      `${state.runs.length} runs · ${state.modelNames.length} models`;
+      `${state.runs.length} runs · ${state.modelNames.length} models · updated ${fmtNow()}`;
 
     // Populate selects
     populateExplorerSelect();
@@ -1527,6 +1531,27 @@ async function init() {
 
     // Initial render
     renderOverview();
+
+    // Auto-refresh every hour (matches Cron-job.org schedule)
+    const REFRESH_MS = 60 * 60 * 1000;
+    setInterval(async () => {
+      try {
+        const res = await fetch('history.db', { cache: 'no-cache' });
+        if (!res.ok) return;
+        const buf = await res.arrayBuffer();
+        state.db = new SQL.Database(new Uint8Array(buf));
+        const data = loadFromDb(state.db);
+        const processed = processData(data);
+        state.runs = processed.runs;
+        state.modelNames = processed.modelNames;
+        state.modelStats = processed.modelStats;
+        document.getElementById('nav-status').textContent =
+          `${state.runs.length} runs · ${state.modelNames.length} models · updated ${fmtNow()}`;
+        switchTab(state.currentTab);
+      } catch (err) {
+        console.warn('Auto-refresh failed:', err);
+      }
+    }, REFRESH_MS);
 
     // Show app
     document.getElementById('loading').style.display = 'none';
