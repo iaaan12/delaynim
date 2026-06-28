@@ -5,7 +5,7 @@ Static dashboard that benchmarks ~20 NVIDIA NIM models via GitHub Actions. Pure 
 
 ## Data flow
 ```
-GitHub Actions (workflow_dispatch)
+GitHub Actions (workflow_dispatch | repository_dispatch)
   -> scripts/test_models.py     (calls NVIDIA NIM API per model)
   -> scripts/results.json       (temp artifact, gitignored)
   -> scripts/merge_results.py   (combines group1 + group2)
@@ -53,7 +53,7 @@ Only needed when upgrading from the legacy JSON format. Removes defunct models l
 |---|---|
 | Add/remove benchmarked models | `ALL_MODELS` in `scripts/test_models.py` |
 | Change benchmark prompt | `PROMPT` in `scripts/test_models.py` |
-| Change schedule | `.github/workflows/benchmark.yml` (add `schedule:` block — currently only `workflow_dispatch`) |
+| Change schedule | `.github/workflows/benchmark.yml` (currently `workflow_dispatch` + `repository_dispatch`; Cron-job.org POSTs to the dispatch API hourly) |
 | Change dashboard copy/colors | `index.html` (CSS vars in `:root`, content in body) |
 | Defunct model cleanup | `REMOVED_MODELS` in `scripts/migrate_to_sqlite.py` |
 
@@ -63,7 +63,8 @@ Only needed when upgrading from the legacy JSON format. Removes defunct models l
 - 3 jobs: `test_group1`, `test_group2` (parallel), `merge_and_update` (depends on both)
 - Each group writes `scripts/results.json`, uploaded as artifact
 - Merge job downloads artifacts, renames to `results-group1.json` / `results-group2.json`, runs `merge_results.py`, commits `history.db`
-- README claims "every hour" but the workflow currently has **no `schedule:` block** — only `workflow_dispatch`. Add one if hourly cron is wanted.
+- Triggers: `workflow_dispatch` (manual) + `repository_dispatch` (event type `ejecutar-script-puntual`, fired by Cron-job.org hourly POST to `/repos/:owner/:repo/dispatches`)
+- No native `schedule:` block — scheduling is delegated to Cron-job.org to avoid GitHub Actions cron delays
 - Required secret: `NIM_API_KEY`
 
 ## Gitignored

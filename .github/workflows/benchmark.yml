@@ -2,6 +2,8 @@ name: Benchmark NVIDIA NIM Models
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [ejecutar-script-puntual]
 
 jobs:
   test_group1:
