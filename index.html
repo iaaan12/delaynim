@@ -605,20 +605,34 @@ const MODEL_PALETTE = [
 
 const CHART_DEFAULTS = {
   tooltip: {
-    backgroundColor: '#1a1a2e',
-    borderColor: '#2a2a40',
+    backgroundColor: 'rgba(15, 15, 20, 0.96)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
-    titleColor: '#e2e2f0',
-    bodyColor: '#8888aa',
+    titleColor: '#ffffff',
+    titleFont: { weight: '600', size: 12 },
+    bodyColor: 'rgba(255, 255, 255, 0.7)',
+    bodyFont: { size: 12 },
     padding: 12,
-    cornerRadius: 8,
-    displayColors: true
+    cornerRadius: 10,
+    displayColors: true,
+    boxPadding: 6,
+    caretSize: 6
   }
 };
 
-Chart.defaults.color = '#666688';
-Chart.defaults.borderColor = '#1c1c2e';
-Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#6e6e73';
+Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.06)';
+Chart.defaults.font.family = "'Geist', -apple-system, BlinkMacSystemFont, sans-serif";
+Chart.defaults.font.weight = 500;
+Chart.defaults.animation = { duration: 600, easing: 'easeOutQuart' };
+Chart.defaults.elements.line.tension = 0.35;
+Chart.defaults.elements.line.borderWidth = 2.5;
+Chart.defaults.elements.line.borderCapStyle = 'round';
+Chart.defaults.elements.line.borderJoinStyle = 'round';
+Chart.defaults.elements.point.radius = 0;
+Chart.defaults.elements.point.hoverRadius = 6;
+Chart.defaults.elements.point.hoverBorderWidth = 2.5;
+Chart.defaults.elements.point.hoverBackgroundColor = '#ffffff';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const state = {
@@ -954,12 +968,17 @@ function renderOverview() {
         label: 'Successes',
         data: successCounts,
         borderColor: '#76b900',
-        backgroundColor: 'rgba(118,185,0,0.08)',
+        backgroundColor: ctx => {
+          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+          g.addColorStop(0, 'rgba(118,185,0,0.18)');
+          g.addColorStop(1, 'rgba(118,185,0,0)');
+          return g;
+        },
         fill: true,
-        tension: 0.3,
+        tension: 0.4,
         pointRadius: 0,
-        pointHoverRadius: 4,
-        borderWidth: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2.5,
       }]
     },
     options: {
@@ -969,7 +988,7 @@ function renderOverview() {
       }}},
       scales: {
         x: { display: false },
-        y: { min: 0, max: 20, grid: { color: '#1c1c2e' }, ticks: { stepSize: 5 } }
+        y: { min: 0, max: 20, grid: { color: 'rgba(0,0,0,0.06)' }, border: { display: false }, ticks: { stepSize: 5, color: '#6e6e73', font: { size: 11 } } }
       }
     }
   });
@@ -983,12 +1002,17 @@ function renderOverview() {
         label: 'Success %',
         data: successRates,
         borderColor: '#00c8ff',
-        backgroundColor: 'rgba(0,200,255,0.06)',
+        backgroundColor: ctx => {
+          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+          g.addColorStop(0, 'rgba(0,200,255,0.16)');
+          g.addColorStop(1, 'rgba(0,200,255,0)');
+          return g;
+        },
         fill: true,
-        tension: 0.3,
+        tension: 0.4,
         pointRadius: 0,
-        pointHoverRadius: 4,
-        borderWidth: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2.5,
       }]
     },
     options: {
@@ -998,7 +1022,7 @@ function renderOverview() {
       }}},
       scales: {
         x: { display: false },
-        y: { min: 0, max: 100, grid: { color: '#1c1c2e' }, ticks: { callback: v => v + '%' } }
+        y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.06)' }, border: { display: false }, ticks: { callback: v => v + '%', color: '#6e6e73', font: { size: 11 } } }
       }
     }
   });
@@ -1016,10 +1040,12 @@ function renderOverview() {
       labels: modelsWithTime.map(m => shortModel(m)),
       datasets: [{
         data: modelsWithTime.map(m => modelStats[m].avgTime / 1000),
-        backgroundColor: modelsWithTime.map((m, i) => i === 0 ? '#76b900' : '#76b90055'),
-        borderColor: modelsWithTime.map((m, i) => i === 0 ? '#76b900' : '#76b90088'),
-        borderWidth: 1,
-        borderRadius: 4,
+        backgroundColor: modelsWithTime.map((m, i) => i === 0 ? '#76b900' : 'rgba(118,185,0,0.35)'),
+        borderColor: modelsWithTime.map((m, i) => i === 0 ? '#76b900' : 'rgba(118,185,0,0.5)'),
+        borderWidth: 0,
+        borderRadius: 6,
+        barThickness: 'flex',
+        maxBarThickness: 28,
       }]
     },
     options: {
@@ -1029,8 +1055,8 @@ function renderOverview() {
         label: (item) => `Avg: ${item.raw.toFixed(2)}s`
       }}},
       scales: {
-        x: { grid: { color: '#1c1c2e' }, ticks: { callback: v => v + 's' } },
-        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        x: { grid: { color: 'rgba(0,0,0,0.06)' }, border: { display: false }, ticks: { callback: v => v + 's', color: '#6e6e73', font: { size: 11 } } },
+        y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11, weight: 500 }, color: '#1d1d1f' } }
       }
     }
   });
@@ -1048,10 +1074,12 @@ function renderOverview() {
       labels: modelsWithTps.map(m => shortModel(m)),
       datasets: [{
         data: modelsWithTps.map(m => modelStats[m].avgTps),
-        backgroundColor: modelsWithTps.map((m, i) => i === 0 ? '#00c8ff' : '#00c8ff44'),
-        borderColor: modelsWithTps.map((m, i) => i === 0 ? '#00c8ff' : '#00c8ff88'),
-        borderWidth: 1,
-        borderRadius: 4,
+        backgroundColor: modelsWithTps.map((m, i) => i === 0 ? '#00c8ff' : 'rgba(0,200,255,0.35)'),
+        borderColor: modelsWithTps.map((m, i) => i === 0 ? '#00c8ff' : 'rgba(0,200,255,0.5)'),
+        borderWidth: 0,
+        borderRadius: 6,
+        barThickness: 'flex',
+        maxBarThickness: 28,
       }]
     },
     options: {
@@ -1061,8 +1089,8 @@ function renderOverview() {
         label: (item) => `${item.raw.toFixed(1)} tok/s`
       }}},
       scales: {
-        x: { grid: { color: '#1c1c2e' }, ticks: { callback: v => v + ' t/s' } },
-        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        x: { grid: { color: 'rgba(0,0,0,0.06)' }, border: { display: false }, ticks: { callback: v => v + ' t/s', color: '#6e6e73', font: { size: 11 } } },
+        y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11, weight: 500 }, color: '#1d1d1f' } }
       }
     }
   });
@@ -1234,7 +1262,7 @@ function renderExplorer() {
       }}},
       scales: {
         x: { display: false },
-        y: { grid: { color: '#1c1c2e' }, ticks: { callback: v => v + 's' } }
+        y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { callback: v => v + 's' } }
       }
     }
   });
@@ -1505,7 +1533,7 @@ function renderCompare() {
       },
       scales: {
         x: { display: false },
-        y: { grid: { color: '#1c1c2e' }, ticks: { callback: v => v + 's' } }
+        y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { callback: v => v + 's' } }
       }
     }
   });
