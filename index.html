@@ -968,12 +968,7 @@ function renderOverview() {
         label: 'Successes',
         data: successCounts,
         borderColor: '#76b900',
-        backgroundColor: ctx => {
-          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
-          g.addColorStop(0, 'rgba(118,185,0,0.18)');
-          g.addColorStop(1, 'rgba(118,185,0,0)');
-          return g;
-        },
+        backgroundColor: 'rgba(118,185,0,0.12)',
         fill: true,
         tension: 0.4,
         pointRadius: 0,
@@ -1002,12 +997,7 @@ function renderOverview() {
         label: 'Success %',
         data: successRates,
         borderColor: '#00c8ff',
-        backgroundColor: ctx => {
-          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
-          g.addColorStop(0, 'rgba(0,200,255,0.16)');
-          g.addColorStop(1, 'rgba(0,200,255,0)');
-          return g;
-        },
+        backgroundColor: 'rgba(0,200,255,0.10)',
         fill: true,
         tension: 0.4,
         pointRadius: 0,
