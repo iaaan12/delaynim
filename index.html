@@ -1057,7 +1057,7 @@ function renderOverview() {
     recsContainer.style.display = 'grid';
     recsContainer.innerHTML = recs.map(r => `
       <div class="rec-card" data-model="${r.model}" data-category="${r.category}">
-        <div class="rec-category"><span class="rec-category-icon">${r.icon</span>${r.categoryLabel</div>
+        <div class="rec-category"><span class="rec-category-icon">${r.icon}</span>${r.categoryLabel}</div>
         <div class="rec-model" title="${r.model}">${shortModel(r.model)}</div>
         <div class="rec-metric">${r.metric</div>
         <div class="rec-reason">${r.reason</div>
