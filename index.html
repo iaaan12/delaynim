@@ -158,6 +158,21 @@ section[data-tab].active{display:block;animation:sectionIn var(--duration-slow) 
 .kpi-sub{font-size:12px;color:var(--accent);margin-top:var(--space-2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi-accent{color:var(--accent)}
 
+/* Recommendations */
+.recommendations{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4);margin-bottom:var(--space-7)}
+@media(max-width:1100px){.recommendations{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.recommendations{grid-template-columns:1fr}}
+.rec-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:var(--space-5);box-shadow:var(--shadow-sm);transition:transform var(--duration) var(--ease-out),box-shadow var(--duration) var(--ease-out);cursor:pointer;position:relative;overflow:hidden}
+.rec-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.rec-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);opacity:0;transition:opacity var(--duration) var(--ease-out)}
+.rec-card:hover::before{opacity:1}
+.rec-category{font-size:11px;font-weight:600;color:var(--text-on-card-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2)}
+.rec-category-icon{font-size:14px}
+.rec-model{font-size:15px;font-weight:600;color:var(--text-on-card);margin-bottom:var(--space-3);font-family:var(--font-mono);letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-metric{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-dim);padding:3px 8px;border-radius:var(--radius-full);margin-bottom:var(--space-3)}
+.rec-reason{font-size:12px;color:var(--text-on-card-dim);line-height:1.5}
+.rec-empty{grid-column:1/-1;text-align:center;padding:var(--space-7);color:var(--text-on-dark-dim);font-size:13px}
+
 /* Cards */
 .card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:var(--space-6);transition:transform var(--duration) var(--ease-out),box-shadow var(--duration) var(--ease-out);box-shadow:var(--shadow-sm)}
 .card:hover{box-shadow:var(--shadow-md)}
@@ -432,7 +447,7 @@ td{padding:14px 16px;color:var(--text-on-card);vertical-align:middle}
           <div class="section-sub" id="overview-sub"></div>
         </div>
       </div>
-      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="recommendations" id="recommendations"></div><div class="kpi-grid" id="kpi-grid"></div>
       <div class="chart-row chart-row-2" style="margin-bottom:20px">
         <div class="card">
           <div class="card-title"><span class="dot"></span>Success Count per Run</div>
@@ -613,6 +628,12 @@ const MODEL_PALETTE = [
   '#10b981','#3b82f6','#ef4444','#8b5cf6','#14b8a6',
   '#eab308','#d946ef','#fb923c','#e11d48','#64748b'
 ];
+
+const CODE_MODELS = new Set([
+  'qwen/qwen3-coder-480b-a35b-instruct',
+  'qwen/qwen2.5-coder-32b-instruct',
+  'mistralai/devstral-2-123b-instruct-2512'
+]);
 
 const CHART_DEFAULTS = {
   tooltip: {
@@ -919,6 +940,86 @@ function processData(data) {
   return { runs, modelNames, modelStats };
 }
 
+function getRecommendations() {
+  const { modelNames, modelStats } = state;
+  const picks = [];
+
+  // Fastest: lowest avgTime among models with uptime >= 70%
+  let fastest = null;
+  for (const m of modelNames) {
+    const s = modelStats[m];
+    if (!s || s.avgTime == null || s.uptime < 0.7) continue;
+    if (!fastest || s.avgTime < fastest.avgTime) fastest = { model: m, ...s };
+  }
+  if (fastest) {
+    picks.push({
+      category: 'fastest',
+      categoryLabel: 'Fastest',
+      icon: '⚡',
+      model: fastest.model,
+      metric: `${(fastest.avgTime / 1000).toFixed(1)}s avg`,
+      reason: `Avg ${(fastest.avgTime / 1000).toFixed(1)}s · ${(fastest.uptime * 100).toFixed(0)}% uptime`
+    });
+  }
+
+  // Most Reliable: highest uptime among models with >= 10 runs
+  let reliable = null;
+  for (const m of modelNames) {
+    const s = modelStats[m];
+    if (!s || s.totalRuns < 10) continue;
+    if (!reliable || s.uptime > reliable.uptime) reliable = { model: m, ...s };
+  }
+  if (reliable) {
+    picks.push({
+      category: 'reliable',
+      categoryLabel: 'Most Reliable',
+      icon: '🛡',
+      model: reliable.model,
+      metric: `${(reliable.uptime * 100).toFixed(0)}% uptime`,
+      reason: `${(reliable.uptime * 100).toFixed(0)}% uptime · ${reliable.totalRuns} runs`
+    });
+  }
+
+  // Best Throughput: highest avgTps among models with uptime >= 70%
+  let throughput = null;
+  for (const m of modelNames) {
+    const s = modelStats[m];
+    if (!s || s.avgTps == null || s.uptime < 0.7) continue;
+    if (!throughput || s.avgTps > throughput.avgTps) throughput = { model: m, ...s };
+  }
+  if (throughput) {
+    picks.push({
+      category: 'throughput',
+      categoryLabel: 'Best Throughput',
+      icon: '🚀',
+      model: throughput.model,
+      metric: `${throughput.avgTps.toFixed(0)} t/s`,
+      reason: `${throughput.avgTps.toFixed(0)} t/s · ${(throughput.uptime * 100).toFixed(0)}% uptime`
+    });
+  }
+
+  // Best for Code: highest score among code-specialized models
+  let code = null;
+  for (const m of modelNames) {
+    if (!CODE_MODELS.has(m)) continue;
+    const s = modelStats[m];
+    if (!s || s.totalRuns < 5) continue;
+    if (!code || s.score > code.score) code = { model: m, ...s };
+  }
+  if (code) {
+    picks.push({
+      category: 'code',
+      categoryLabel: 'Best for Code',
+      icon: '💻',
+      model: code.model,
+      metric: `Score ${code.score}`,
+      reason: code.avgTime ? `Score ${code.score} · ${(code.avgTime / 1000).toFixed(1)}s avg` : `Score ${code.score}`
+    });
+  }
+
+  return picks;
+}
+
 // ─── Overview Tab ─────────────────────────────────────────────────────────────
 function renderOverview() {
   const { runs, modelNames, modelStats } = state;
@@ -946,6 +1047,24 @@ function renderOverview() {
   ];
 
   const kpiGrid = document.getElementById('kpi-grid');
+
+  // Recommendations
+  const recs = getRecommendations();
+  const recsContainer = document.getElementById('recommendations');
+  if (recs.length === 0) {
+    recsContainer.style.display = 'none';
+  } else {
+    recsContainer.style.display = 'grid';
+    recsContainer.innerHTML = recs.map(r => `
+      <div class="rec-card" data-model="${r.model}" data-category="${r.category}">
+        <div class="rec-category"><span class="rec-category-icon">${r.icon</span>${r.categoryLabel</div>
+        <div class="rec-model" title="${r.model}">${shortModel(r.model)}</div>
+        <div class="rec-metric">${r.metric</div>
+        <div class="rec-reason">${r.reason</div>
+     </div>
+    `).join('');
+  }
+
   kpiGrid.innerHTML = kpiData.map(k => `
     <div class="kpi-card">
       <div class="kpi-icon">${k.icon}</div>
@@ -1663,6 +1782,17 @@ async function init() {
     // Nav tabs
     document.querySelectorAll('.nav-tab[data-goto]').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.dataset.goto));
+    });
+
+    // Recommendation cards (delegated)
+    document.getElementById('recommendations').addEventListener('click', e => {
+      const card = e.target.closest('.rec-card');
+      if (!card) return;
+      const model = card.dataset.model;
+      if (model && state.modelNames.includes(model)) {
+        state.explorerModel = model;
+        switchTab('explorer');
+      }
     });
 
     // Modal controls
