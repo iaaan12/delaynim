@@ -101,20 +101,26 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:
 }
 
 /* Nav */
-nav{position:sticky;top:0;z-index:200;background:var(--bg-overlay);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);height:64px;display:flex;align-items:center;padding:0 var(--space-6);gap:var(--space-2)}
-.nav-brand{font-size:17px;font-weight:700;color:var(--accent);letter-spacing:-0.02em;margin-right:var(--space-5);white-space:nowrap}
-.nav-brand span{color:var(--text-on-dark-dim);font-weight:400}
+nav{position:sticky;top:0;z-index:200;background:var(--bg-overlay);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);height:64px;display:flex;align-items:center;padding:0 var(--space-6);gap:var(--space-5)}
+.nav-brand{display:flex;align-items:center;gap:var(--space-2);margin-right:var(--space-2);white-space:nowrap}
+.nav-logo{flex-shrink:0}
+.nav-brand-text{font-size:16px;font-weight:600;color:var(--text-on-dark);letter-spacing:-0.02em}
+.nav-brand-text span{color:var(--accent);font-weight:700}
 .nav-tabs{display:flex;gap:var(--space-1);flex:1}
-.nav-tab{background:none;border:none;color:var(--text-on-dark-dim);font-family:var(--font-sans);font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:color var(--duration) var(--ease-out),background var(--duration) var(--ease-out);white-space:nowrap}
+.nav-tab{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--text-on-dark-dim);font-family:var(--font-sans);font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:color var(--duration) var(--ease-out),background var(--duration) var(--ease-out);white-space:nowrap}
 .nav-tab:hover{color:var(--text-on-dark);background:rgba(255,255,255,0.04)}
 .nav-tab.active{color:var(--accent);background:var(--accent-dim)}
 .nav-status{margin-left:auto;font-size:12px;color:var(--text-on-dark-dim);font-family:var(--font-mono);letter-spacing:-0.01em}
 
 /* Loading */
 #loading{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:var(--space-5)}
-.spinner{width:40px;height:40px;border:2px solid rgba(255,255,255,0.08);border-top-color:var(--accent);border-radius:50%;animation:spin 0.9s cubic-bezier(0.65,0,0.35,1) infinite}
+.loading-brand{display:flex;flex-direction:column;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)}
+.loading-logo{animation:logoPulse 2s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(0.95)}}
+.loading-text{font-size:18px;font-weight:600;color:var(--text-on-dark);letter-spacing:-0.02em}
+.spinner{width:32px;height:32px;border:2px solid rgba(255,255,255,0.08);border-top-color:var(--accent);border-radius:50%;animation:spin 0.9s cubic-bezier(0.65,0,0.35,1) infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#loading p{color:var(--text-on-dark-dim);font-size:14px;font-weight:500;letter-spacing:-0.01em}
+#loading p{color:var(--text-on-dark-dim);font-size:13px;font-weight:500;letter-spacing:-0.01em}
 #app{opacity:0;transition:opacity var(--duration-slow) var(--ease-out)}
 #app.visible{opacity:1}
 
@@ -125,9 +131,10 @@ nav{position:sticky;top:0;z-index:200;background:var(--bg-overlay);backdrop-filt
 #error-state p{color:var(--text-on-dark-dim);font-size:14px;max-width:400px;line-height:1.6}
 
 /* Main layout */
-main{max-width:1400px;margin:0 auto;padding:28px 24px}
-section[data-tab]{display:none}
+main{max-width:1400px;margin:0 auto;padding:var(--space-7) var(--space-6) var(--space-8)}
+section[data-tab]{display:none;animation:sectionIn var(--duration-slow) var(--ease-out)}
 section[data-tab].active{display:block}
+@keyframes sectionIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* KPI Cards */
 .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:28px}
@@ -355,22 +362,50 @@ td{padding:10px 16px;color:var(--text);vertical-align:middle}
 <body>
 
 <div id="loading">
+  <div class="loading-brand">
+    <svg class="loading-logo" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="28" height="28" rx="8" fill="#76b900"/>
+      <path d="M9 20 L9 12 M14 20 L14 8 M19 20 L19 14 M24 20 L24 10" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round"/>
+   </svg>
+    <div class="loading-text">NIMStats</div>
+ </div>
   <div class="spinner"></div>
   <p>Loading benchmark data…</p>
 </div>
 
 <div id="app">
   <nav>
-    <div class="nav-brand">NIM<span>Stats</span></div>
+    <div class="nav-brand">
+      <svg class="nav-logo" width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="28" height="28" rx="8" fill="#76b900"/>
+        <path d="M9 20 L9 12 M14 20 L14 8 M19 20 L19 14 M24 20 L24 10" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round"/>
+     </svg>
+      <span class="nav-brand-text">NIM<span>Stats</span></span>
+   </div>
     <div class="nav-tabs">
-      <button class="nav-tab active" data-goto="overview">📊 Overview</button>
-      <button class="nav-tab" data-goto="leaderboard">🏆 Leaderboard</button>
-      <button class="nav-tab" data-goto="explorer">🔬 Explorer</button>
-      <button class="nav-tab" data-goto="timeline">⏱ Timeline</button>
-      <button class="nav-tab" data-goto="compare">⚔️ Compare</button>
-    </div>
-    <div class="nav-status" id="nav-status"></div>
-  </nav>
+      <button class="nav-tab active" data-goto="overview">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5">/svg>
+        <span>Overview</span>
+     </button>
+      <button class="nav-tab" data-goto="leaderboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z">/svg>
+        <span>Leaderboard</span>
+     </button>
+      <button class="nav-tab" data-goto="explorer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3">/svg>
+        <span>Explorer</span>
+     </button>
+      <button class="nav-tab" data-goto="timeline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14">/svg>
+        <span>Timeline</span>
+     </button>
+      <button class="nav-tab" data-goto="compare">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/><path d="M8 6v12"/><path d="M16 6v12">/svg>
+        <span>Compare</span>
+     </button>
+   </div>
+    <div class="nav-status" id="nav-status</div>
+ </nav>
 
   <main>
     <div id="error-state">
