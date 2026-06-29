@@ -125,15 +125,15 @@ nav{position:sticky;top:0;z-index:200;background:var(--bg-overlay);backdrop-filt
 #app.visible{opacity:1}
 
 /* Error state */
-#error-state{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:var(--space-4);text-align:center;padding:var(--space-7)}
+#error-state{display:none;position:fixed;inset:0;z-index:998;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:var(--space-4);text-align:center;padding:var(--space-7)}
 #error-state .err-icon{font-size:48px}
 #error-state h2{color:var(--danger);font-size:20px;font-weight:600;letter-spacing:-0.01em}
 #error-state p{color:var(--text-on-dark-dim);font-size:14px;max-width:400px;line-height:1.6}
 
 /* Main layout */
 main{max-width:1400px;margin:0 auto;padding:var(--space-7) var(--space-6) var(--space-8)}
-section[data-tab]{display:none;animation:sectionIn var(--duration-slow) var(--ease-out)}
-section[data-tab].active{display:block}
+section[data-tab]{display:none}
+section[data-tab].active{display:block;animation:sectionIn var(--duration-slow) var(--ease-out)}
 @keyframes sectionIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* KPI Cards */
@@ -1590,7 +1590,7 @@ async function init() {
       locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
     });
 
-    const res = await fetch('history.db');
+    const res = await fetch('history.db?v=' + Date.now());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const buf = await res.arrayBuffer();
     state.db = new SQL.Database(new Uint8Array(buf));
