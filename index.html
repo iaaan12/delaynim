@@ -1605,11 +1605,14 @@ function switchTab(tabName) {
   document.querySelector(`section[data-tab="${tabName}"]`)?.classList.add('active');
   document.querySelector(`.nav-tab[data-goto="${tabName}"]`)?.classList.add('active');
 
-  if (tabName === 'overview') renderOverview();
-  if (tabName === 'leaderboard') renderLeaderboard();
-  if (tabName === 'explorer') renderExplorer();
-  if (tabName === 'timeline') renderTimeline();
-  if (tabName === 'compare') renderCompare();
+  // Defer chart rendering to next frame so section is visible (canvas needs dimensions)
+  requestAnimationFrame(() => {
+    if (tabName === 'overview') renderOverview();
+    if (tabName === 'leaderboard') renderLeaderboard();
+    if (tabName === 'explorer') renderExplorer();
+    if (tabName === 'timeline') renderTimeline();
+    if (tabName === 'compare') renderCompare();
+  });
 }
 
 // ─── Initialization ───────────────────────────────────────────────────────────
