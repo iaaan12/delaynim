@@ -6,7 +6,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 HISTORY_DB = REPO_ROOT / "history.db"
-MAX_RUNS = 720
+MAX_RUNS = 0  # 0 = no limit, keep all runs
 
 
 def init_schema(conn: sqlite3.Connection) -> None:
@@ -75,10 +75,11 @@ def write_run(run: dict[str, Any], db_path: Path = HISTORY_DB) -> None:
                 for m in run.get("models", [])
             ],
         )
-        conn.execute(
-            f"DELETE FROM runs WHERE id NOT IN "
-            f"(SELECT id FROM runs ORDER BY timestamp DESC LIMIT {MAX_RUNS})"
-        )
+        if MAX_RUNS > 0:
+            conn.execute(
+                f"DELETE FROM runs WHERE id NOT IN "
+                f"(SELECT id FROM runs ORDER BY timestamp DESC LIMIT {MAX_RUNS})"
+            )
         conn.commit()
     finally:
         conn.close()
