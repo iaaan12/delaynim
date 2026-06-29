@@ -124,6 +124,13 @@ nav{position:sticky;top:0;z-index:200;background:var(--bg-overlay);backdrop-filt
 #app{opacity:0;transition:opacity var(--duration-slow) var(--ease-out)}
 #app.visible{opacity:1}
 
+/* Skeleton shimmer */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 100%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:var(--radius-sm)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+.skeleton-card .skeleton{height:14px;margin-bottom:var(--space-3)}
+.skeleton-card .skeleton.big{height:40px;width:60%;margin-bottom:var(--space-4)}
+
 /* Error state */
 #error-state{display:none;position:fixed;inset:0;z-index:998;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:var(--space-4);text-align:center;padding:var(--space-7)}
 #error-state .err-icon{font-size:48px}
@@ -726,13 +733,15 @@ function destroyChart(key) {
 
 function animateCounter(el, target, duration = 1200, decimals = 0, suffix = '') {
   const start = performance.now();
+  const startVal = parseFloat(el.textContent) || 0;
+  // Critically damped spring: smooth, no overshoot
+  const omega = 2.2 / (duration / 1000);
   const update = (now) => {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3);
-    const val = target * ease;
+    const elapsed = (now - start) / 1000;
+    const settled = 1 - Math.exp(-omega * elapsed) * (1 + omega * elapsed);
+    const val = startVal + (target - startVal) * settled;
     el.textContent = (decimals ? val.toFixed(decimals) : Math.round(val)) + suffix;
-    if (progress < 1) requestAnimationFrame(update);
+    if (elapsed * 1000 < duration * 1.5) requestAnimationFrame(update);
   };
   requestAnimationFrame(update);
 }
